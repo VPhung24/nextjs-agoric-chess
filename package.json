@@ -1,0 +1,32 @@
+{
+  "name": "snowball-nextjs-pwa-starter",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@agoric/eventual-send": "^0.14.1",
+    "@agoric/notifier": "^0.7.0-u17.1",
+    "chess.js": "^1.0.0-beta.8",
+    "next": "14.2.5",
+    "next-pwa": "^5.6.0",
+    "react": "^18",
+    "react-chessboard": "^4.7.1",
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "@types/chess.js": "^0.13.7",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.5",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}
