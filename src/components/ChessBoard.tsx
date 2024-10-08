@@ -1,47 +1,113 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import { Piece, Square } from "react-chessboard/dist/chessboard/types";
-import { convertPiece } from "@/utils/convert";
 
-export default function PlayRandomMoveEngine() {
+const buttonStyle = {
+  cursor: "pointer",
+  padding: "10px 20px",
+  margin: "10px 10px 0px 0px",
+  borderRadius: "6px",
+  backgroundColor: "#f0d9b5",
+  border: "none",
+  boxShadow: "0 2px 5px rgba(0, 0, 0, 0.5)",
+};
+
+const inputStyle = {
+  padding: "10px 20px",
+  margin: "10px 0 10px 0",
+  borderRadius: "6px",
+  border: "none",
+  boxShadow: "0 2px 5px rgba(0, 0, 0, 0.5)",
+  width: "100%",
+};
+
+const boardWrapper = {
+  width: `70vw`,
+  maxWidth: "70vh",
+  margin: "3rem auto",
+};
+
+const ChessBoard: React.FC = () => {
   const [game, setGame] = useState(new Chess());
 
-  function isDraggablePiece({
-    piece,
-    sourceSquare,
-  }: {
+  function isDraggablePiece(currentPiece: {
     piece: Piece;
     sourceSquare: Square;
   }) {
-    if (
-      game.inCheck() ||
-      game.isDraw() ||
-      (typeof piece === "string" && piece.startsWith(game.turn()))
-    ) {
-      return false;
-    }
-    return true;
+    const canMove =
+      game.moves({
+        square: currentPiece.sourceSquare,
+      }).length > 0;
+    return (
+      canMove && currentPiece.piece.startsWith(game.turn() === "w" ? "w" : "b")
+    );
   }
 
-  // needs work
-  function onDrop(sourceSquare: Square, targetSquare: Square, piece: Piece) {
-    const gameCopy = new Chess(game.fen());
-    const move = gameCopy.move({
-      from: sourceSquare,
-      to: targetSquare,
-      promotion: "q",
+  function safeGameMutate(modify: (game: Chess) => void) {
+    setGame((prevState: Chess) => {
+      const update = new Chess(prevState.fen());
+      modify(update);
+      return update;
     });
+  }
 
-    if (move === null) return false;
+  function onDrop(
+    sourceSquare: Square,
+    targetSquare: Square,
+    piece: Piece
+  ): boolean {
+    const gameCopy = new Chess(game.fen());
+    const move = gameCopy
+      .moves({
+        square: sourceSquare,
+        piece: piece,
+      })
+      .find((move) => move === targetSquare);
+
+    if (move === undefined) {
+      return false;
+    }
+
+    gameCopy.move(move);
+    setGame(gameCopy);
     return true;
   }
 
   return (
-    <Chessboard
-      position={game.fen()}
-      onPieceDrop={onDrop}
-      isDraggablePiece={isDraggablePiece}
-    />
+    <div style={boardWrapper}>
+      <Chessboard
+        id="PlayVsRandom"
+        position={game.fen()}
+        onPieceDrop={onDrop}
+        customBoardStyle={{
+          borderRadius: "4px",
+          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
+        }}
+        isDraggablePiece={isDraggablePiece}
+      />
+      <button
+        style={buttonStyle}
+        onClick={() => {
+          safeGameMutate((game: Chess) => {
+            game.reset();
+          });
+        }}
+      >
+        reset
+      </button>
+      <button
+        style={buttonStyle}
+        onClick={() => {
+          safeGameMutate((game: Chess) => {
+            game.undo();
+          });
+        }}
+      >
+        undo
+      </button>
+    </div>
   );
-}
+};
+
+export default ChessBoard;
